@@ -8,7 +8,14 @@
 </head>
 <body>
     <header>
-        <h1>jjsal1234s channel</h1>
+        <div id="channel-info">
+            <img src="path/to/your/image.jpg" alt="Channel Profile Picture" id="channel-pfp">
+            <div id="channel-details">
+                <h1>jjsal1234s channel</h1>
+                <p id="channel-name"></p>
+                <p id="subscriber-count"></p>
+            </div>
+        </div>
     </header>
     <main>
         <section id="recent">
@@ -28,11 +35,17 @@
     <script>
         const apiKey = 'AIzaSyD736m_31zGA99LK9Q-6-Y2bdrGzCziQBQ'; // Replace with your YouTube API key
         const channelId = 'UCq6ydzXyvdcTfvGDnMKq7aQ'; // Replace with your YouTube channel ID
-
+        
         async function getVideos(order) {
             const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=10&order=${order}&key=${apiKey}`);
             const data = await response.json();
             return data.items;
+        }
+
+        async function getChannelInfo() {
+            const response = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`);
+            const data = await response.json();
+            return data.items[0];
         }
 
         function displayVideos(videos, containerId) {
@@ -48,6 +61,19 @@
                 container.appendChild(videoElement);
             });
         }
+
+        function displayChannelInfo(channelInfo) {
+            const channelNameElement = document.getElementById('channel-name');
+            const subscriberCountElement = document.getElementById('subscriber-count');
+            const channelPfpElement = document.getElementById('channel-pfp');
+
+            channelNameElement.textContent = `Channel: ${channelInfo.snippet.title}`;
+            subscriberCountElement.textContent = `Subscribers: ${channelInfo.statistics.subscriberCount.toLocaleString()}`;
+            channelPfpElement.src = channelInfo.snippet.thumbnails.medium.url;
+        }
+
+        // Fetch and display channel information
+        getChannelInfo().then(channelInfo => displayChannelInfo(channelInfo));
 
         // Display recent videos
         getVideos('date').then(videos => displayVideos(videos, 'recent-videos'));
